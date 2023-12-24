@@ -1,6 +1,42 @@
 import os
 import streamlit as st
-from st_clickable_images import clickable_images
+from PIL import Image
+import streamlit.components.v1 as components
+st.set_page_config(page_title="Крок емоційний!", page_icon="🌠", layout="wide", initial_sidebar_state="expanded")
+st.markdown("""
+    <style>
+        .centered-text {
+            position: fixed;
+            top: 80%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+            z-index: 1;
+            text-shadow: -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff, 2px 2px 0 #fff;
+            pointer-events: none;
+            opacity: 0;
+        }
+        [data-testid=stImage] { 
+            cursor: pointer;
+        }
+        .animated {
+            animation: fade 1s;
+        }
+
+        @keyframes fade {
+            0%, 100% {
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+    <div class="centered-text" id="clipboard-anim">
+        <h1>Скопійовано!</h1>
+    </div>
+""", unsafe_allow_html=True)
 
 def list_folders(path):
     return [f.name for f in os.scandir(path) if f.is_dir()]
@@ -8,72 +44,80 @@ def list_folders(path):
 def list_files(path):
     return [f.name for f in os.scandir(path) if f.is_file()]
 
-def display_images(image_folder):
-    captions = list_files(image_folder)
-    captions
-    images = ["https://raw.githubusercontent.com/Modem-i4/KrokPlots/main/"+image_folder+"/"+img for img in captions]
-    images
-    clicked = clickable_images(
-        images,
-        titles=captions,
-        div_style={"display": "flex", "justify-content": "center", "flex-wrap": "wrap"},
-        img_style={"margin": "5px", "height": "200px"},
-    )
-    st.markdown(f"Image #{clicked} clicked" if clicked > -1 else "No image clicked")
-    # for i in range(0, len(images), 5):
-    #     cols = st.columns(5)
-    #     for j in range(5):
-    #         if i + j < len(images):
-    #             image_path = os.path.join(image_folder, images[i + j])
-    #             img_obj = Image.open(image_path)
-    #             aspect_ratio = img_obj.width / img_obj.height
-    #             target_width = int(300 * aspect_ratio)
-    #             cols[j].image(img_obj, caption=images[i + j], output_format="auto", width=target_width)
+def display_cat_images(image_folder) :
+    display_images(list_files(image_folder), image_folder)
+    
 
 
+def display_images(images, image_folder, captions = None):
+    if not captions : captions = images 
+    colsNumber = 2 if image_folder == 'textures\\bg' else 3 if image_folder == 'textures\\thoughts' else 5
+    cols = st.columns(colsNumber)
+    for i in range(0, len(images), colsNumber):
+        for j in range(colsNumber):
+            if i + j < len(images):
+                image_path = os.path.join(image_folder, images[i + j])
+                img_obj = Image.open(image_path)
+                aspect_ratio = img_obj.width / img_obj.height
+                target_width = int(300 * aspect_ratio)
+                cols[j].image(img_obj, caption=captions[i + j], output_format="auto", width=target_width)
 
-def copy_caption_callback(caption):
-    def callback():
-        st.success(f"Caption '{caption}' copied!")
-    return callback
 
+st.title("Крок вибіркових емоцій!")
+st.sidebar.title("🌠 Крок до зірок")
+selected_category = st.sidebar.selectbox("Обери категорію!", ["Всі персонажі", "Персонажі", "Фони", "Думки"])
 
-st.title("File Explorer with Streamlit")
+translations = {"Фони": "bg", "Думки": "thoughts"}
 
-# Вибрати категорію
-selected_category = st.sidebar.selectbox("Select a category", ["bg", "chars", "thoughts"])
+chars_path = os.path.join("textures", "chars")
+selected_chars = []
+if selected_category == "Всі персонажі":
+    chars = list_folders(chars_path)
+    chars_urls = [os.path.join(char, f"{char}_default.png") for char in chars]
+    display_images(chars_urls, chars_path, chars)
 
-if selected_category == "chars":
-    # Вибрати папку персонажа
-    chars_path = "textures/chars"#os.path.join("textures", "chars")
+elif selected_category == "Персонажі":
     available_chars = list_folders(chars_path)
 
-    # Відобразити чекбокси для кожного персонажа
-    st.sidebar.subheader("Select characters:")
-    selected_chars = []
+    st.sidebar.subheader("Обери персонажів:")
     for char in available_chars:
         selected = st.sidebar.checkbox(char)
         if selected:
             selected_chars.append(char)
 
     if not selected_chars:
-        st.warning("Please select at least one character.")
+        st.warning("Вік, вибери хоч одненького :)")
     else :
-        st.header("Images for Selected Characters")
+        st.header("Емоції обраних персонажів:")
         for char_folder in selected_chars:
-            display_images(chars_path+"/"+char_folder) #(os.path.join(chars_path, char_folder))
+            display_cat_images(os.path.join(chars_path, char_folder))
 else:
-    # Відобразити зображення для обраної категорії (bg або thoughts)
-    st.header(f"Images for {selected_category}")
-    display_images("textures"+"/"+selected_category)
+    st.header(f"Зображення з {selected_category}")
+    display_cat_images(os.path.join("textures", translations[selected_category]))
 
 
-# components.html("""<script>
-#     var images = parent.window.querySelectorAll('img');
-#     console.log(images);
-#     images.forEach(function(img) {
-#         img.addEventListener('click', function() {
-#             console.log("BLYAAA");
-#         });
-#     });
-# </script>""")
+components.html("""<script>
+    var images = parent.document.querySelectorAll('[data-testid=stImage]');
+    
+    function copyToClipboard(text) {
+        var tempInput = document.createElement('input');
+        tempInput.value = text;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        document.execCommand('copy');
+        document.body.removeChild(tempInput);
+    }
+    var animatedText = parent.document.getElementById('clipboard-anim');
+    images.forEach(function(imgBlock) {
+        imgBlock.addEventListener('click', function(e) {
+            let caption = imgBlock.querySelector('[data-testid="caption"]').textContent.trim();
+            copyToClipboard(caption);
+            animatedText.classList.add('animated');
+        });
+    });
+                
+    animatedText.addEventListener('animationend', function() {
+        animatedText.classList.remove('animated');
+    });
+        
+</script>""")
