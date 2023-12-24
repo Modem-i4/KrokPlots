@@ -51,7 +51,7 @@ def display_cat_images(image_folder) :
 
 def display_images(images, image_folder, captions = None):
     if not captions : captions = images 
-    colsNumber = 2 if image_folder == 'textures/bg' or 'textures\\bg' else 3 if image_folder == 'textures/thoughts' or 'textures\\thoughts' else 5
+    colsNumber = 2 if image_folder == 'textures/bg' or image_folder == 'textures\\bg' else 3 if image_folder == 'textures/thoughts' or image_folder == 'textures\\thoughts' else 5
     cols = st.columns(colsNumber)
     for i in range(0, len(images), colsNumber):
         for j in range(colsNumber):
@@ -97,7 +97,7 @@ else:
 
 
 components.html("""<script>
-    var images = parent.document.querySelectorAll('[data-testid=stImage]');
+    var images = parent.document.querySelectorAll('[data-testid=column] .element-container');
     
     function copyToClipboard(text) {
         var tempInput = document.createElement('input');
@@ -110,7 +110,7 @@ components.html("""<script>
     var animatedText = parent.document.getElementById('clipboard-anim');
     images.forEach(function(imgBlock) {
         imgBlock.addEventListener('click', function(e) {
-            let caption = imgBlock.querySelector('[data-testid="caption"]').textContent.trim();
+            let caption = imgBlock.querySelector('[data-testid="caption"]').textContent.trim().replace(".png", "");
             copyToClipboard(caption);
             animatedText.classList.add('animated');
         });
