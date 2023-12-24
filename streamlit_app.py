@@ -51,6 +51,7 @@ def display_cat_images(image_folder) :
 
 def display_images(images, image_folder, captions = None):
     if not captions : captions = images 
+    st.title(image_folder)
     colsNumber = 2 if image_folder == 'textures\\bg' else 3 if image_folder == 'textures\\thoughts' else 5
     cols = st.columns(colsNumber)
     for i in range(0, len(images), colsNumber):
