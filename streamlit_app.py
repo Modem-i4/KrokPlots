@@ -110,7 +110,8 @@ components.html("""<script>
     var animatedText = parent.document.getElementById('clipboard-anim');
     images.forEach(function(imgBlock) {
         imgBlock.addEventListener('click', function(e) {
-            let caption = imgBlock.querySelector('[data-testid="caption"]').textContent.trim().replace(".png", "");
+            //let caption = imgBlock.querySelector('[data-testid=caption]').textContent.trim().replace(".png", "");
+            let caption = imgBlock.querySelector('[data-testid=stImageCaption]').textContent.trim().replace(".png", "");
             copyToClipboard(caption);
             animatedText.classList.add('animated');
         });
