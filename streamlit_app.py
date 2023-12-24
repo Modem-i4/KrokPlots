@@ -1,12 +1,6 @@
 import os
-from PIL import Image
 import streamlit as st
-import streamlit.components.v1 as components
 from st_clickable_images import clickable_images
-import js2py 
-  
-#res_2 = js2py.eval_js("$('*').click(()=>{console.log('BLYAAA')})") 
-
 
 def list_folders(path):
     return [f.name for f in os.scandir(path) if f.is_dir()]
@@ -14,14 +8,10 @@ def list_folders(path):
 def list_files(path):
     return [f.name for f in os.scandir(path) if f.is_file()]
 
-def on_image_click(image_path):
-    st.write(f"Clicked on image: {image_path}")
-
 def display_images(image_folder):
     captions = list_files(image_folder)
     captions
-    images = ["/"+image_folder+"/"+img for img in captions]
-    images = ["\\"+os.path.join(image_folder,img) for img in captions]
+    images = ["https://raw.githubusercontent.com/Modem-i4/KrokPlots/main/"+image_folder+"/"+img for img in captions]
     images
     clicked = clickable_images(
         images,
@@ -55,7 +45,7 @@ selected_category = st.sidebar.selectbox("Select a category", ["bg", "chars", "t
 
 if selected_category == "chars":
     # Вибрати папку персонажа
-    chars_path = os.path.join("textures", "chars")
+    chars_path = "textures/chars"#os.path.join("textures", "chars")
     available_chars = list_folders(chars_path)
 
     # Відобразити чекбокси для кожного персонажа
@@ -71,11 +61,11 @@ if selected_category == "chars":
     else :
         st.header("Images for Selected Characters")
         for char_folder in selected_chars:
-            display_images(os.path.join(chars_path, char_folder))
+            display_images(chars_path+"/"+char_folder) #(os.path.join(chars_path, char_folder))
 else:
     # Відобразити зображення для обраної категорії (bg або thoughts)
     st.header(f"Images for {selected_category}")
-    display_images(os.path.join("textures", selected_category))
+    display_images("textures"+"/"+selected_category)
 
 
 # components.html("""<script>
