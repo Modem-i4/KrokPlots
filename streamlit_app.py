@@ -82,10 +82,14 @@ elif selected_category == "Персонажі":
     available_chars = list_folders(chars_path)
 
     st.sidebar.subheader("Обери персонажів:")
-    for char in available_chars:
-        selected = st.sidebar.checkbox(char)
-        if selected:
-            selected_chars.append(char)
+    select_all = st.sidebar.checkbox("Обрати всіх")
+    if select_all:
+        selected_chars = available_chars
+    else:
+        for char in available_chars:
+            selected = st.sidebar.checkbox(char)
+            if selected:
+                selected_chars.append(char)
 
     if not selected_chars:
         st.warning("Вік, вибери хоч одненького :)")
