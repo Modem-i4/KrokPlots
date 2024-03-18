@@ -42,7 +42,8 @@ def list_folders(path):
     return [f.name for f in os.scandir(path) if f.is_dir()]
 
 def list_files(path):
-    return [f.name for f in os.scandir(path) if f.is_file()]
+    file_names = [f.name for f in os.scandir(path) if f.is_file()]
+    return sorted(file_names)
 
 def display_cat_images(image_folder) :
     display_images(list_files(image_folder), image_folder)
