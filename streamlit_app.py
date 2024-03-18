@@ -39,7 +39,8 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def list_folders(path):
-    return [f.name for f in os.scandir(path) if f.is_dir()]
+    folder_names = [f.name for f in os.scandir(path) if f.is_dir()]
+    return sorted(folder_names)
 
 def list_files(path):
     file_names = [f.name for f in os.scandir(path) if f.is_file()]
